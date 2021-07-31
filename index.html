@@ -8,7 +8,7 @@
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+		<link rel="stylesheet" href="dist/theme/beige.css">
 
 		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="plugin/highlight/monokai.css">
@@ -16,10 +16,23 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+        <section data-markdown>
+          <textarea data-template>
+            ## dry-monads / Result
+
+            ```ruby [1,2|4]
+            def call(params)
+              values = yield validate(params)
+              account = yield create_account(values[:account])
+              owner = yield create_owner(account, values[:owner])
+
+              Success([account, owner])
+            end
+            ```
+          </textarea>
+        </section>
+      </div>
+    </div>
 
 		<script src="dist/reveal.js"></script>
 		<script src="plugin/notes/notes.js"></script>
