@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Using dry-monads Result for Error Handling</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
@@ -16,20 +16,42 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-        <section data-markdown>
-          <textarea data-template>
-            ## dry-monads / Result
+        <section data-auto-animate>
+          <h2>dry-monads / Result</h2>
 
-            ```ruby [1,2|4]
-            def call(params)
-              values = yield validate(params)
-              account = yield create_account(values[:account])
-              owner = yield create_owner(account, values[:owner])
+          <img src="images/cat-box.gif">
+          <pre data-id="def-result"><code data-trim data-line-numbers class="ruby">
+          Success(x)
+          Failure(e)
+          </code></pre>
+        </section>
+        <section data-auto-animate>
+          <h2>dry-monads / Result</h2>
 
-              Success([account, owner])
-            end
-            ```
-          </textarea>
+          <pre data-id="def-result"><code data-trim data-line-numbers="1|1-2|1-3" class="ruby">
+          f(x) #=> Success(y)
+          Success(x).bind(f) #=> Success(y)
+          Failure(e).bind(f) #=> Failure(e)
+          </code></pre>
+          <pre class="fragment"><code data-trim data-line-numbers class="ruby">
+          g(x) #=> Failure(ew)
+          Success(x).bind(g) #=> Failure(ew)
+          Failure(e).bind(g) #=> Failure(e)
+          </code></pre>
+        </section>
+        <section>
+          <h2>Recurring problem</h2>
+          <code>h(g(f(x)))</code>
+          <p class="fragment" data-fragment-index="1">&dArr;</p>
+          <code class="fragment" data-fragment-index="1">(f&bull;g&bull;h)(x)</code>
+          <p class="fragment" data-fragment-index="2">&dArr;</p>
+          <code class="fragment" data-fragment-index="2">f(x).bind(g).bind(h)</code>
+
+          <aside class="notes" data-markdown>
+          Recurring problem is that.
+
+          In context of operation=service objects, make deep nested is bad. Chaining is better for reusable.
+          </aside>
         </section>
       </div>
     </div>
