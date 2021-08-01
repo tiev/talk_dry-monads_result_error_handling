@@ -128,15 +128,22 @@
           </div>
           <div class="r-hstack justify-around items-start">
             <div style="text-align:left">
-              <p><code>#success? (#errors.empty?)</code><br>
+              <p class="fragment" data-fragment-index="1"><code>#success? (#errors.empty?)</code><br>
               <code>#data</code></p>
-              <p><span style="font-weight:bold">Service objects</span> are passed forward</p>
+              <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Service objects</span> are passed forward</p>
             </div>
             <div style="text-align:left">
-              <p><code>Success(x) or Failure(e)</code><br>_</p>
-              <p><span style="font-weight:bold">Result objects</span> are passed forward</p>
+              <p class="fragment" data-fragment-index="1"><code>Success(x) or Failure(e)</code><br>_</p>
+              <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Result objects</span> are passed forward</p>
             </div>
           </div>
+          <aside class="notes" data-markdown>
+            * Current binder has 2 separate data in the service instance:...
+            * Result binder return data with its context.
+
+            Therefore, service objects need to be passed forward for current binder to work.
+            While Result binder only need the returned result.
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Handling errors in service objects</h2>
@@ -173,9 +180,11 @@
             </code></pre>
           </div>
           <aside class="notes" data-markdown>
-            Service swallows errors. It reduces reusability.
+            Service swallows errors.
 
-            The actions for errors are context dependent.
+            It reduces reusability.
+
+            The actions for errors must be context dependent.
           </aside>
         </section>
         <section data-auto-animate>
@@ -200,6 +209,31 @@
             But don't swallow errors.
 
             But line 5 is not that simple. And it's bad because of coupling on service A.
+
+            This leads to the introduction of ROP.
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>Railway Oriented Programming</h2>
+          <div>
+            <img src="images/flow-rop.png" alt="rop" data-id="error-flow">
+            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+              class B
+                ...
+                result = A.new.call # Success or Failure
+                return result unless result.success?
+                ...
+              end
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            ROP is essentially that. At the end, we can choose what to do with each error case.
+
+            But it's seem too good to be true.
+
+            I've been mentioning only Result monad. Stop here is fine already.
+
+            Next part I will talk about Do-notation and other things to work this out.
           </aside>
         </section>
       </div>
