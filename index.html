@@ -9,6 +9,8 @@
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
 		<link rel="stylesheet" href="dist/theme/beige.css">
+    <link rel="stylesheet" href="dist/layout.css">
+    <link rel="stylesheet" href="dist/code.css">
 
 		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="plugin/highlight/monokai.css">
@@ -21,23 +23,37 @@
 
           <img src="images/cat-box.gif">
           <pre data-id="def-result"><code data-trim data-line-numbers class="ruby">
-          Success(x)
-          Failure(e)
+            Success(x)
+            Failure(e)
           </code></pre>
+
+          <aside class="notes" data-markdown>
+            We're only mentioning the Result monad in the dry-monads lib.
+
+            Result is a box that contains a value.
+
+            Result has 2 possible values (Success, Failure) and bias toward the Success value.
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>dry-monads / Result</h2>
 
-          <pre data-id="def-result"><code data-trim data-line-numbers="1|1-2|1-3" class="ruby">
-          f(x) #=> Success(y)
-          Success(x).bind(f) #=> Success(y)
-          Failure(e).bind(f) #=> Failure(e)
+          <pre data-id="def-result"><code data-trim data-line-numbers="1|1-2|*" class="ruby">
+            f(x) #=> Success(y)
+            Success(x).bind(f) #=> Success(y)
+            Failure(e).bind(f) #=> Failure(e)
           </code></pre>
           <pre class="fragment"><code data-trim data-line-numbers class="ruby">
-          g(x) #=> Failure(ew)
-          Success(x).bind(g) #=> Failure(ew)
-          Failure(e).bind(g) #=> Failure(e)
+            g(x) #=> Failure(ew)
+            Success(x).bind(g) #=> Failure(ew)
+            Failure(e).bind(g) #=> Failure(e)
           </code></pre>
+
+          <aside class="notes" data-markdown>
+            With a function f ..., Success & Failure behave ...
+
+            So with a function g ..., they behave ...
+          </aside>
         </section>
         <section>
           <h2>Recurring problem</h2>
@@ -48,10 +64,79 @@
           <code class="fragment" data-fragment-index="2">f(x).bind(g).bind(h)</code>
 
           <aside class="notes" data-markdown>
-          Recurring problem is that.
+            Monads in general solve the recurring problem.
+            Problem is nested function calls with the last declared first.
 
-          In context of operation=service objects, make deep nested is bad. Chaining is better for reusable.
+            It is rewritten as ... But that's only in math, in ruby code we have ...
+
+            In context of operation=service objects, make deep nested is bad. Chaining is better for reusable.
           </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>Our current binder</h2>
+          <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-6|8-12|14-16" class="ruby">
+            def call(user_id, address_id)
+              user_service = FindUser.new.call(user_id) #=> FindUser instance
+              unless user_service.success?
+                add_errors(user_service.errors)
+                return self
+              end
+
+              address_service = FindAddress.new.call(address_id) #=> FindAddress instance
+              unless address_service.success?
+                add_errors(address_service.errors)
+                return self
+              end
+
+              unless user_service.user.update(address: address_service.address)
+                add_errors(user_service.user.errors)
+              end
+
+              self
+            end
+          </code></pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Result binder</h2>
+          <pre data-id="binder" class="r-stretch" style="width:100%"><code data-trim data-line-numbers="2-3|5-6|8-12" class="ruby">
+            def call(user_id, address_id)
+              user_result = FindUser.new.call(user_id) #=> Success(user) OR Failure(errors)
+              return user_result unless user_result.success?
+
+              address_result = FindAddress.new.call(address_id) #=> Success(address) OR Failure(errors)
+              return address_result unless address_result.success?
+
+              if user_result.value!.update(address: address_result.value!)
+                Success(user_result.value!)
+              else
+                Failure(user_result.value!.errors)
+              end
+            end
+          </code></pre>
+          <aside class="notes" data-markdown>
+            It's already shorter.
+
+            * You can see middle errors are just returned.
+            * We can talk about why to popup errors to upper layer in the next 2 slides.
+            * Now we can talk about the similarities.
+          </aside>
+        </section>
+        <section>
+          <div class="r-hstack justify-around">
+              <h3>Current binder</h3>
+              <h3>Result binder</h3>
+          </div>
+          <div class="r-hstack justify-around items-start">
+            <div style="text-align:left">
+              <p><code>#success? (#errors.empty?)</code><br>
+              <code>#data</code></p>
+              <p><span style="font-weight:bold">Service objects</span> are passed forward</p>
+            </div>
+            <div style="text-align:left">
+              <p><code>Success(x) or Failure(e)</code><br>.</p>
+              <p><span style="font-weight:bold">Result objects</span> are passed forward</p>
+            </div>
+          </div>
         </section>
       </div>
     </div>
