@@ -117,14 +117,14 @@
             It's already shorter.
 
             * You can see middle errors are just returned.
-            * We can talk about why to popup errors to upper layer in the next 2 slides.
+            * We can talk about why to popup errors to upper layer shortly later.
             * Now we can talk about the similarities.
           </aside>
         </section>
         <section>
           <div class="r-hstack justify-around">
-              <h3>Current binder</h3>
-              <h3>Result binder</h3>
+            <h3 style="margin-bottom:0px">Current binder</h3>
+            <h3>Result binder</h3>
           </div>
           <div class="r-hstack justify-around items-start">
             <div style="text-align:left">
@@ -133,10 +133,74 @@
               <p><span style="font-weight:bold">Service objects</span> are passed forward</p>
             </div>
             <div style="text-align:left">
-              <p><code>Success(x) or Failure(e)</code><br>.</p>
+              <p><code>Success(x) or Failure(e)</code><br>_</p>
               <p><span style="font-weight:bold">Result objects</span> are passed forward</p>
             </div>
           </div>
+        </section>
+        <section data-auto-animate>
+          <h2>Handling errors in service objects</h2>
+          <div>
+            <img src="images/flow-basic.png" alt="basic service flow" data-id="error-flow">
+            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+              class B
+                ...
+                service = A.new.call
+                unless service.success?
+                  add_errors(service.errors) 
+                end
+                ...
+              end
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            Service propagates errors to upper layer.
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>Handling errors in service objects</h2>
+          <div>
+            <img src="images/flow-swallow.png" alt="service swallows errors" data-id="error-flow">
+            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+              class B
+                ...
+                service = A.new.call
+                unless service.success?
+                  Sentry.notify(service.errors)
+                end
+                ...
+              end
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            Service swallows errors. It reduces reusability.
+
+            The actions for errors are context dependent.
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>Handling errors in service objects</h2>
+          <div>
+            <img src="images/flow-both.png" alt="service does both" data-id="error-flow">
+            <pre data-id="error-code"><code data-trim data-line-numbers="*|5" class="ruby">
+              class B
+                ...
+                service = A.new.call
+                unless service.success?
+                  add_errors(service.errors) 
+                  Sentry.notify(service.errors)
+                end
+                ...
+              end
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            Can do both if Sentry step is important.
+
+            But don't swallow errors.
+
+            But line 5 is not that simple. And it's bad because of coupling on service A.
+          </aside>
         </section>
       </div>
     </div>
