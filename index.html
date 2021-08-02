@@ -18,44 +18,46 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-        <section data-auto-animate>
-          <h2>dry-monads / Result</h2>
+        <section title="Result descr">
+          <section data-auto-animate>
+            <h2>dry-monads / Result</h2>
 
-          <img src="images/cat-box.gif">
-          <pre data-id="def-result"><code data-trim data-line-numbers class="ruby">
+            <img src="images/cat-box.gif">
+            <pre data-id="def-result"><code data-trim data-line-numbers class="ruby">
             Success(x)
             Failure(e)
-          </code></pre>
+            </code></pre>
 
-          <aside class="notes" data-markdown>
-            We're only mentioning the Result monad in the dry-monads lib.
+            <aside class="notes" data-markdown>
+              We're only mentioning the Result monad in the dry-monads lib.
 
-            Result is a box that contains a value.
+              Result is a box that contains a value.
 
-            Result has 2 possible values (Success, Failure) and bias toward the Success value.
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>dry-monads / Result</h2>
+              Result has 2 possible values (Success, Failure) and bias toward the Success value.
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>dry-monads / Result</h2>
 
-          <pre data-id="def-result"><code data-trim data-line-numbers="1|1-2|*" class="ruby">
+            <pre data-id="def-result"><code data-trim data-line-numbers="1|1-2|*" class="ruby">
             f(x) #=> Success(y)
             Success(x).bind(f) #=> Success(y)
             Failure(e).bind(f) #=> Failure(e)
-          </code></pre>
-          <pre class="fragment"><code data-trim data-line-numbers class="ruby">
+            </code></pre>
+            <pre class="fragment"><code data-trim data-line-numbers class="ruby">
             g(x) #=> Failure(ew)
             Success(x).bind(g) #=> Failure(ew)
             Failure(e).bind(g) #=> Failure(e)
-          </code></pre>
+            </code></pre>
 
-          <aside class="notes" data-markdown>
-            With a function f ..., Success & Failure behave ...
+            <aside class="notes" data-markdown>
+              With a function f ..., Success & Failure behave ...
 
-            So with a function g ..., they behave ...
-          </aside>
+              So with a function g ..., they behave ...
+            </aside>
+          </section>
         </section>
-        <section>
+        <section title="Recurring">
           <h2>Recurring problem</h2>
           <code>h(g(f(x)))</code>
           <p class="fragment" data-fragment-index="1">&dArr;</p>
@@ -72,9 +74,10 @@
             In context of operation=service objects, make deep nested is bad. Chaining is better for reusable.
           </aside>
         </section>
-        <section data-auto-animate>
-          <h2>Our current binder</h2>
-          <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-6|8-12|14-16" class="ruby">
+        <section title="Compare binders">
+          <section data-auto-animate>
+            <h2>Our current binder</h2>
+            <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-6|8-12|14-16" class="ruby">
             def call(user_id, address_id)
               user_service = FindUser.new.call(user_id) #=> FindUser instance
               unless user_service.success?
@@ -94,11 +97,11 @@
 
               self
             end
-          </code></pre>
-        </section>
-        <section data-auto-animate>
-          <h2>Result binder</h2>
-          <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-3|5-6|8-12" class="ruby">
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>Result binder</h2>
+            <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-3|5-6|8-12" class="ruby">
             def call(user_id, address_id)
               user_result = FindUser.new.call(user_id) #=> Success(user) OR Failure(errors)
               return user_result unless user_result.success?
@@ -112,44 +115,46 @@
                 Failure(user_result.value!.errors)
               end
             end
-          </code></pre>
-          <aside class="notes" data-markdown>
-            It's already shorter.
+            </code></pre>
+            <aside class="notes" data-markdown>
+              It's already shorter.
 
-            * You can see middle errors are just returned.
-            * We can talk about why to popup errors to upper layer shortly later.
-            * Now we can talk about the similarities.
-          </aside>
-        </section>
-        <section>
-          <div class="r-hstack justify-around">
-            <h3 style="margin-bottom:0px">Current binder</h3>
-            <h3>Result binder</h3>
-          </div>
-          <div class="r-hstack justify-around items-start">
-            <div style="text-align:left">
-              <p class="fragment" data-fragment-index="1"><code>#success? (#errors.empty?)</code><br>
-              <code>#data</code></p>
-              <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Service objects</span> are passed forward</p>
+              * You can see middle errors are just returned.
+              * We can talk about why to popup errors to upper layer shortly later.
+              * Now we can talk about the similarities.
+            </aside>
+          </section>
+          <section>
+            <div class="r-hstack justify-around">
+              <h3 style="margin-bottom:0px">Current binder</h3>
+              <h3>Result binder</h3>
             </div>
-            <div style="text-align:left">
-              <p class="fragment" data-fragment-index="1"><code>Success(x) or Failure(e)</code><br>_</p>
-              <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Result objects</span> are passed forward</p>
+            <div class="r-hstack justify-around items-start">
+              <div style="text-align:left">
+                <p class="fragment" data-fragment-index="1"><code>#success? (#errors.empty?)</code><br>
+                <code>#data</code></p>
+                <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Service objects</span> are passed forward</p>
+              </div>
+              <div style="text-align:left">
+                <p class="fragment" data-fragment-index="1"><code>Success(x) or Failure(e)</code><br>_</p>
+                <p class="fragment" data-fragment-index="2"><span style="font-weight:bold">Result objects</span> are passed forward</p>
+              </div>
             </div>
-          </div>
-          <aside class="notes" data-markdown>
-            * Current binder has 2 separate data in the service instance:...
-            * Result binder return data with its context.
+            <aside class="notes" data-markdown>
+              * Current binder has 2 separate data in the service instance:...
+              * Result binder return data with its context.
 
-            Therefore, service objects need to be passed forward for current binder to work.
-            While Result binder only need the returned result.
-          </aside>
+              Therefore, service objects need to be passed forward for current binder to work.
+              While Result binder only need the returned result.
+            </aside>
+          </section>
         </section>
-        <section data-auto-animate>
-          <h2>Handling errors in service objects</h2>
-          <div>
-            <img src="images/flow-basic.png" alt="basic service flow" data-id="error-flow">
-            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+        <section title="Road to ROP">
+          <section data-auto-animate>
+            <h2>Handling errors in service objects</h2>
+            <div>
+              <img src="images/flow-basic.png" alt="basic service flow" data-id="error-flow">
+              <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
               class B
                 ...
                 service = A.new.call
@@ -158,17 +163,17 @@
                 end
                 ...
               end
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            Service propagates errors to upper layer.
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>Handling errors in service objects</h2>
-          <div>
-            <img src="images/flow-swallow.png" alt="service swallows errors" data-id="error-flow">
-            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              Service propagates errors to upper layer.
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>Handling errors in service objects</h2>
+            <div>
+              <img src="images/flow-swallow.png" alt="service swallows errors" data-id="error-flow">
+              <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
               class B
                 ...
                 service = A.new.call
@@ -177,21 +182,21 @@
                 end
                 ...
               end
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            Service swallows errors.
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              Service swallows errors.
 
-            It reduces reusability.
+              It reduces reusability.
 
-            The actions for errors must be context dependent.
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>Handling errors in service objects</h2>
-          <div>
-            <img src="images/flow-both.png" alt="service does both" data-id="error-flow">
-            <pre data-id="error-code"><code data-trim data-line-numbers="*|5" class="ruby">
+              The actions for errors must be context dependent.
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>Handling errors in service objects</h2>
+            <div>
+              <img src="images/flow-both.png" alt="service does both" data-id="error-flow">
+              <pre data-id="error-code"><code data-trim data-line-numbers="*|5" class="ruby">
               class B
                 ...
                 service = A.new.call
@@ -201,44 +206,46 @@
                 end
                 ...
               end
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            Can do both if Sentry step is important.
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              Can do both if Sentry step is important.
 
-            But don't swallow errors.
+              But don't swallow errors.
 
-            But line 5 is not that simple. And it's bad because of coupling on service A.
+              But line 5 is not that simple. And it's bad because of coupling on service A.
 
-            This leads to the introduction of ROP.
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>Railway Oriented Programming</h2>
-          <div>
-            <img src="images/flow-rop.png" alt="rop" data-id="error-flow">
-            <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
+              This leads to the introduction of ROP.
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>Railway Oriented Programming</h2>
+            <div>
+              <img src="images/flow-rop.png" alt="rop" data-id="error-flow">
+              <pre data-id="error-code"><code data-trim data-line-numbers class="ruby">
               class B
                 ...
                 result = A.new.call # Success or Failure
                 return result unless result.success?
                 ...
               end
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            ROP is essentially that. At the end, we can choose what to do with each error case.
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              ROP is essentially that. At the end, we can choose what to do with each error case.
 
-            But it's seem too good to be true.
+              But it's seem too good to be true.
 
-            I've been mentioning only Result monad. Stop here is fine already.
+              I've been mentioning only Result monad. Stop here is fine already.
 
-            Next part I will talk about Do-notation and other things to work this out.
-          </aside>
+              Next part I will talk about Do-notation and other things to work this out.
+            </aside>
+          </section>
         </section>
-        <section data-auto-animate>
-          <h2>#call</h2>
-          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|3-4|6-7|9-13|*" class="ruby">
+        <section title="Do-notation">
+          <section data-auto-animate>
+            <h2>#call</h2>
+            <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|3-4|6-7|9-13|*" class="ruby">
             class UpdateUserAddress
               def call(user_id, address_id)
                 user_result = FindUser.new.call(user_id) #=> Success(user) OR Failure(errors)
@@ -254,16 +261,16 @@
                 end
               end
             end
-          </code></pre>
-          <aside class="notes" data-markdown>
-            This is the updating user address from previous slides.
+            </code></pre>
+            <aside class="notes" data-markdown>
+              This is the updating user address from previous slides.
 
-            Drop errors on the red-stream, otherwise continue.
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>#call with Do-notation</h2>
-          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|5" class="ruby">
+              Drop errors on the red-stream, otherwise continue.
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>#call with Do-notation</h2>
+            <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|5" class="ruby">
             class UpdateUserAddress
               include Dry::Monads[:do]
 
@@ -278,18 +285,20 @@
                 end
               end
             end
-          </code></pre>
-          <aside class="notes" data-markdown>
-            This doing the same. Do-notation gives just a tidier code.
+            </code></pre>
+            <aside class="notes" data-markdown>
+              This doing the same. Do-notation gives just a tidier code.
 
-            It auto-handles the red-stream, leaving only green-stream for better visual.
+              It auto-handles the red-stream, leaving only green-stream for better visual.
 
-            So how does the red-stream go? It's related to why `yield` here.
-          </aside>
+              So how does the red-stream go? It's related to why `yield` here.
+            </aside>
+          </section>
         </section>
-        <section>
-          <h2>yield in Array#map</h2>
-          <pre><code data-trim data-line-numbers class="ruby">
+        <section title="Explain yield">
+          <section>
+            <h2>yield in Array#map</h2>
+            <pre><code data-trim data-line-numbers class="ruby">
             [1, 2, 3].map { |x| x * 2 }
             #=> [2, 4, 6]
 
@@ -299,18 +308,18 @@
               y = yield x
               ...
             end
-          </code></pre>
-          <aside class="notes" data-markdown>
-            To remind what yield does:
-            * call given block
-            * passing some data
-            * receive the returned value
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>yield what?</h2>
-          <div class="r-vstack">
-            <pre data-id="call-do"><code data-trim data-line-numbers="5" class="ruby">
+            </code></pre>
+            <aside class="notes" data-markdown>
+              To remind what yield does:
+              * call given block
+              * passing some data
+              * receive the returned value
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>yield what?</h2>
+            <div class="r-vstack">
+              <pre data-id="call-do"><code data-trim data-line-numbers="5" class="ruby">
               class UpdateUserAddress
                 include Dry::Monads[:do]
 
@@ -325,23 +334,23 @@
                   end
                 end
               end
-            </code></pre>
-            <pre class="fragment zoom-in"><code data-trim class="ruby">
+              </code></pre>
+              <pre class="fragment zoom-in"><code data-trim class="ruby">
               ->(result) {
                 result.success? ? result.value! : raise Halt.new(result)
               }
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            yield receives a Result object, passes to this block
-            * If Success, extract the value inside
-            * If Failure, raise Halt exception
-          </aside>
-        </section>
-        <section data-auto-animate>
-          <h2>yield what?</h2>
-          <div class="r-vstack">
-            <pre data-id="call-do"><code data-trim data-line-numbers="4,5,13-15" class="ruby">
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              yield receives a Result object, passes to this block
+              * If Success, extract the value inside
+              * If Failure, raise Halt exception
+            </aside>
+          </section>
+          <section data-auto-animate>
+            <h2>yield what?</h2>
+            <div class="r-vstack">
+              <pre data-id="call-do"><code data-trim data-line-numbers="4,5,13-15" class="ruby">
               class UpdateUserAddress
                 include Dry::Monads[:do]
 
@@ -358,17 +367,18 @@
                   e.result
                 end
               end
-            </code></pre>
-            <pre><code data-trim class="ruby">
+              </code></pre>
+              <pre><code data-trim class="ruby">
               ->(result) {
                 result.success? ? result.value! : raise Halt.new(result)
               }
-            </code></pre>
-          </div>
-          <aside class="notes" data-markdown>
-            #call catches the exception and return the Failure.
-            That's how Failure is put in the red-stream.
-          </aside>
+              </code></pre>
+            </div>
+            <aside class="notes" data-markdown>
+              #call catches the exception and return the Failure.
+              That's how Failure is put in the red-stream.
+            </aside>
+          </section>
         </section>
       </div>
     </div>
