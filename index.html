@@ -262,8 +262,8 @@
           </aside>
         </section>
         <section data-auto-animate>
-          <h2>#call</h2>
-          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|*" class="ruby">
+          <h2>#call with Do-notation</h2>
+          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|5" class="ruby">
             class UpdateUserAddress
               include Dry::Monads[:do]
 
@@ -283,6 +283,91 @@
             This doing the same. Do-notation gives just a tidier code.
 
             It auto-handles the red-stream, leaving only green-stream for better visual.
+
+            So how does the red-stream go? It's related to why `yield` here.
+          </aside>
+        </section>
+        <section>
+          <h2>yield in Array#map</h2>
+          <pre><code data-trim data-line-numbers class="ruby">
+            [1, 2, 3].map { |x| x * 2 }
+            #=> [2, 4, 6]
+
+            def map
+              ...
+              # with each element x
+              y = yield x
+              ...
+            end
+          </code></pre>
+          <aside class="notes" data-markdown>
+            To remind what yield does:
+            * call given block
+            * passing some data
+            * receive the returned value
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>yield what?</h2>
+          <div class="r-vstack">
+            <pre data-id="call-do"><code data-trim data-line-numbers="5" class="ruby">
+              class UpdateUserAddress
+                include Dry::Monads[:do]
+
+                def call(user_id, address_id)
+                  user = yield FindUser.new.call(user_id) #=> user
+                  address = yield FindAddress.new.call(address_id) #=> address
+
+                  if user.update(address: address)
+                    Success(user)
+                  else
+                    Failure(user.errors)
+                  end
+                end
+              end
+            </code></pre>
+            <pre class="fragment zoom-in"><code data-trim class="ruby">
+              ->(result) {
+                result.success? ? result.value! : raise Halt.new(result)
+              }
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            yield receives a Result object, passes to this block
+            * If Success, extract the value inside
+            * If Failure, raise Halt exception
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>yield what?</h2>
+          <div class="r-vstack">
+            <pre data-id="call-do"><code data-trim data-line-numbers="4,5,13-15" class="ruby">
+              class UpdateUserAddress
+                include Dry::Monads[:do]
+
+                def call(user_id, address_id)
+                  user = yield FindUser.new.call(user_id) #=> user
+                  address = yield FindAddress.new.call(address_id) #=> address
+
+                  if user.update(address: address)
+                    Success(user)
+                  else
+                    Failure(user.errors)
+                  end
+                rescue Halt => e
+                  e.result
+                end
+              end
+            </code></pre>
+            <pre><code data-trim class="ruby">
+              ->(result) {
+                result.success? ? result.value! : raise Halt.new(result)
+              }
+            </code></pre>
+          </div>
+          <aside class="notes" data-markdown>
+            #call catches the exception and return the Failure.
+            That's how Failure is put in the red-stream.
           </aside>
         </section>
       </div>
