@@ -98,7 +98,7 @@
         </section>
         <section data-auto-animate>
           <h2>Result binder</h2>
-          <pre data-id="binder" class="r-stretch" style="width:100%"><code data-trim data-line-numbers="2-3|5-6|8-12" class="ruby">
+          <pre data-id="binder" class="r-stretch"><code data-trim data-line-numbers="2-3|5-6|8-12" class="ruby">
             def call(user_id, address_id)
               user_result = FindUser.new.call(user_id) #=> Success(user) OR Failure(errors)
               return user_result unless user_result.success?
@@ -234,6 +234,55 @@
             I've been mentioning only Result monad. Stop here is fine already.
 
             Next part I will talk about Do-notation and other things to work this out.
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>#call</h2>
+          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|3-4|6-7|9-13|*" class="ruby">
+            class UpdateUserAddress
+              def call(user_id, address_id)
+                user_result = FindUser.new.call(user_id) #=> Success(user) OR Failure(errors)
+                return user_result unless user_result.success?
+
+                address_result = FindAddress.new.call(address_id) #=> Success(address) OR Failure(errors)
+                return address_result unless address_result.success?
+
+                if user_result.value!.update(address: address_result.value!)
+                  Success(user_result.value!)
+                else
+                  Failure(user_result.value!.errors)
+                end
+              end
+            end
+          </code></pre>
+          <aside class="notes" data-markdown>
+            This is the updating user address from previous slides.
+
+            Drop errors on the red-stream, otherwise continue.
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>#call</h2>
+          <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|*" class="ruby">
+            class UpdateUserAddress
+              include Dry::Monads[:do]
+
+              def call(user_id, address_id)
+                user = yield FindUser.new.call(user_id) #=> user
+                address = yield FindAddress.new.call(address_id) #=> address
+
+                if user.update(address: address)
+                  Success(user)
+                else
+                  Failure(user.errors)
+                end
+              end
+            end
+          </code></pre>
+          <aside class="notes" data-markdown>
+            This doing the same. Do-notation gives just a tidier code.
+
+            It auto-handles the red-stream, leaving only green-stream for better visual.
           </aside>
         </section>
       </div>
