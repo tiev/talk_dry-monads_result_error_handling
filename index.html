@@ -235,11 +235,9 @@
             <aside class="notes" data-markdown>
               ROP is essentially that. At the end, we can choose what to do with each error case.
 
-              But it's seem too good to be true.
-
               I've been mentioning only Result monad. Stop here is fine already.
 
-              Next part I will talk about Do-notation and other things to work this out.
+              Next part I will talk about Do-notation and how it streamlines this style.
             </aside>
           </section>
         </section>
@@ -413,8 +411,51 @@
             </aside>
           </section>
         </section>
-        <section title="">
-          
+        <section title="First to Last">
+          <section data-auto-animate>
+            <h2>We went from here...</h2>
+            <pre data-id="first-to-last" class="r-stretch"><code data-trim data-line-numbers class="ruby">
+              def call(user_id, address_id)
+                user_service = FindUser.new.call(user_id)
+                unless user_service.success?
+                  add_errors(user_service.errors)
+                  return self
+                end
+
+                address_service = FindAddress.new.call(address_id)
+                unless address_service.success?
+                  add_errors(address_service.errors)
+                  return self
+                end
+
+                unless user_service.user.update(address: address_service.address)
+                  add_errors(user_service.user.errors)
+                end
+
+                self
+              end
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>... to here</h2>
+            <pre data-id="first-to-last" class="r-stretch"><code data-trim data-line-numbers class="ruby">
+              def call(user_id, address_id)
+                user = yield FindUser.new.call(user_id)
+                address = yield FindAddress.new.call(address_id)
+
+                if user.update(address: address)
+                  Success(user)
+                else
+                  Failure(user.errors)
+                end
+              end
+            </code></pre>
+            <aside class="notes" data-markdown>
+              In the last session, I heard comment about Result being verbose.
+
+              I oppose that. It's actually less verbose and less boilerplate.
+            </aside>
+          </section>
         </section>
       </div>
     </div>
