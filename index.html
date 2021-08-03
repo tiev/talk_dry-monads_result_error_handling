@@ -57,11 +57,12 @@
             </aside>
           </section>
         </section>
-        <section title="Recurring">
-          <h2>Recurring problem</h2>
+        <section title="Func Composition">
+          <h2>Function Composition problem</h2>
           <code>h(g(f(x)))</code>
           <p class="fragment" data-fragment-index="1">&dArr;</p>
           <code class="fragment" data-fragment-index="1">(f&bull;g&bull;h)(x)</code>
+          <p><small class="fragment" data-fragment-index="1">First-class composition with HoF</small></p>
           <p class="fragment" data-fragment-index="2">&dArr;</p>
           <code class="fragment" data-fragment-index="2">f(x).bind(g).bind(h)</code>
 
@@ -270,7 +271,7 @@
           </section>
           <section data-auto-animate>
             <h2>#call with Do-notation</h2>
-            <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|5" class="ruby">
+            <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="*|2|5|6|8-12|*|5" class="ruby">
             class UpdateUserAddress
               include Dry::Monads[:do]
 
@@ -379,6 +380,9 @@
               That's how Failure is put in the red-stream.
             </aside>
           </section>
+        </section>
+        <section title="">
+          
         </section>
       </div>
     </div>
