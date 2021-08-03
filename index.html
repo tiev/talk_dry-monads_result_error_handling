@@ -380,6 +380,38 @@
               That's how Failure is put in the red-stream.
             </aside>
           </section>
+          <section>
+            <h2>Don't wanna yield?</h2>
+            <pre data-id="call-do" class="r-stretch"><code data-trim data-line-numbers="14-15|14-16" class="ruby">
+              class UpdateUserAddress
+                include Dry::Monads[:do]
+
+                def call(user_id, address_id)
+                  user = yield FindUser.new.call(user_id) #=> user
+                  address = yield FindAddress.new.call(address_id) #=> address
+
+                  if user.update(address: address)
+                    Success(user)
+                  else
+                    Failure(user.errors)
+                  end
+
+                  NotifyUserUpdate.new(user, delayed: true)
+                    .call(address: address)
+                    .or { |err| BugReporter.notify_jokers(err) }
+                end
+              end
+            </code></pre>
+            <aside class="notes" data-markdown>
+              For email notification, we usually don't handle if it has error.
+
+              But with this we can:
+              * make main flow safe by not apply yield to it
+              * easily handle errors with Result methods #or
+
+              However, there's better technique for steps like this. Will talk when having chance.
+            </aside>
+          </section>
         </section>
         <section title="">
           
